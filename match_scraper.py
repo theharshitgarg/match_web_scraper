@@ -15,6 +15,7 @@ from time import ctime, sleep
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome
 
+from  selenium.common.exceptions import ElementClickInterceptedException
 
 class MatchesDBAdapter():
     def __init__(self):
@@ -25,19 +26,40 @@ class MatchesDBAdapter():
             (id INTEGER PRIMARY KEY,
              team1 TEXT NOT NULL,
              team2 TEXT NOT NULL,
-             startDate timestamp);
+             startDate timestamp,
+             tople_left TEXT,
+             tople_right TEXT,
+             kormer_left TEXT,
+             kormer_right TEXT,
+             gol_left TEXT,
+             gol_right TEXT,
+             kirmizi_left TEXT,
+             kirmizi_right TEXT,
+             orta_left TEXT,
+             orta_right TEXT);
             '''
+
         self.cursor.execute(self.create_matches_table_query)
         self.db_connection.commit()
 
         self.insert_matches_query = '''
             INSERT INTO 'matches'
+            (team1, team2 , startDate, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmize_left, kirmizi_right, orta_left, orta_right) VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            '''
+
+        self.insert_matches_basic_query = '''
+            INSERT INTO 'matches'
             (team1, team2 , startDate) VALUES
-            (?, ?, ? );
+            (?, ?, ?);
             '''
 
     def populate_data(self, row_data):
         self.cursor.execute(self.insert_matches_query, row_data)
+        self.db_connection.commit()
+
+    def populate_data_basic(self, row_data):
+        self.cursor.execute(self.insert_matches_basic_query, row_data)
         self.db_connection.commit()
 
 
@@ -87,7 +109,6 @@ class MatchScraper():
                     try:
                         print(date_str.text.split(' ')[1])
                     except Exception as e:
-                        import pdb; pdb.set_trace()
                         print(e)
 
                     date_str = date_str.text.split(' ')[1]
@@ -104,8 +125,49 @@ class MatchScraper():
                             date = datetime.strptime(date_str, '%d.%m.%Y')
                         team1 = split_text[1].strip()
                         team2 = split_text[3].strip()
+
+                        try:
+                            match_stats_link = k.find_element_by_xpath('//a/span[@data-dateformat="time"]').find_element_by_xpath('..').click()
+
+                            try:
+                                self.driver.find_element_by_partial_link_text('Genel').click()
+                                tople_left = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[2]/td[1]').text
+                                tople_right = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[2]/td[3]').text
+
+                                kormer_left = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[10]/td[1]').text
+                                kormer_right = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[10]/td[3]').text
+                            except Exception as e:
+                                print("Exception ", str(e))
+
+                            try:
+                                self.driver.find_element_by_partial_link_text('Hücum').click()
+                                gol_left = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[1]').text
+                                gol_right = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[3]').text
+                            except Exception as e:
+                                print("Exception ", str(e))
+
+                            try:
+                                self.driver.find_element_by_partial_link_text('Faul').click()
+                                kirmizi_left = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[5]/div/table/tbody/tr[6]/td[1]').text
+                                kirmizi_right = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[5]/div/table/tbody/tr[6]/td[3]').text
+                            except Exception as e:
+                                print("Exception ", str(e))
+
+                            try:
+                                self.driver.find_element_by_partial_link_text('Pas').click()
+                                orta_left = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[1]').text
+                                orta_right = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[3]').text
+                            except Exception as e:
+                                print("Exception ", str(e))
+
+                            data = (team1, team2, date, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmizi_left, kirmizi_right, orta_left, orta_right)
+                            self.database_adapter.populate_data(data)
+                        except Exception as e:
+                            print("Exception ", str(e))
+
+                        # pdb.set_trace()
                         data = (team1, team2, date)
-                        self.database_adapter.populate_data(data)
+                        self.database_adapter.populate_data_basic(data)
 
         self.clean_up()
         print("Match Scraping completed.....")

@@ -65,7 +65,6 @@ class MatchesDBAdapter():
 
 class MatchScraper():
     def __init__(self):
-        self.drive = Chrome()
         self.base_url = 'https://www.mackolik.com/futbol/canli-sonuclar'
         self.driver = Chrome()
         self.default_sleep_interval = 3 # In seconds

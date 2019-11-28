@@ -16,28 +16,6 @@ from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome
 
 
-def populate_data():
-    db_connection = sqlite3.connect('web_scraper_data.db')
-    cursor = db_connection.cursor()
-
-    cursor.execute('''CREATE TABLE matches
-                (date text, trans text, symbol text, qty real, price real)''')
-
-    # Insert a row of data
-    cursor.execute("INSERT INTO istatisticks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
-
-
-    # Save (commit) the changes
-    db_connection.commit()
-
-    cursor.execute('''DROP TABLE istatisticks''')
-    db_connection.commit()
-    # We can also close the connection if we are done with it.
-    # Just be sure any changes have been committed or they will be lost.
-    db_connection.close()
-
-
-
 class MatchesDBAdapter():
     def __init__(self):
         self.db_connection = sqlite3.connect('web_scraper_data.db')

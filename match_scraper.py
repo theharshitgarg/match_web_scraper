@@ -58,9 +58,15 @@ class MatchScraper():
 
         matches = self.driver.find_elements_by_xpath('//div[contains(@class, "widget-livescore__title")]')
         match_links = set()
+        print("Orginal Matches : ", len(matches))
+
         for match in matches:
             anchor =  match.find_element_by_xpath('..').find_element_by_xpath('.//a')
+            print("Anchor : ", anchor.get_attribute('href'))
             match_links.add(anchor.get_attribute('href'))
+
+        print("Match Links Found ...")
+        print('\n'.join(match_links))
 
         for match_link in match_links:
             print("matching link : ", match_link)

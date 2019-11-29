@@ -3,7 +3,7 @@
 import csv
 from datetime import datetime
 import pdb
-# from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.keys import Keys
 import sqlite3
 # from collections import namedtuple
 # from threading import Thread
@@ -17,11 +17,14 @@ from selenium.webdriver import Chrome
 from  selenium.common.exceptions import ElementClickInterceptedException
 import logging
 
-FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+FORMAT = '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(message)s'
 
-logging.basicConfig(format=FORMAT, level=logging.INFO, filename='match_logs.log')
+logging.basicConfig(format=FORMAT, level=logging.DEBUG, filename='match_logs.log')
 logger = logging.getLogger("football_match_logger")
-logger.warning("Football Match Logger")
+logger.info("Football Match Logger")
+logger.info("-"*80)
+logger.info("Starting at : " + datetime.now().strftime("%d:%m:%Y $H:%M:%S"))
+logger.info("-"*80)
 
 class MatchesDBAdapter():
     def __init__(self):
@@ -34,6 +37,7 @@ class MatchesDBAdapter():
              team2 TEXT NOT NULL,
              startDate timestamp,
              scraped_at timestamp,
+             match_stats_link TEXT,
              tople_left TEXT,
              tople_right TEXT,
              kormer_left TEXT,
@@ -48,24 +52,27 @@ class MatchesDBAdapter():
 
         self.cursor.execute(self.create_matches_table_query)
         self.db_connection.commit()
+        logger.info("Match Table Created")
 
         self.insert_matches_query = '''
             INSERT INTO 'matches'
-            (team1, team2 , startDate, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmize_left, kirmizi_right, orta_left, orta_right, scraped_at) VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            (team1, team2 , startDate, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmize_left, kirmizi_right, orta_left, orta_right, scraped_at, match_stats_link) VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             '''
 
         self.insert_matches_basic_query = '''
             INSERT INTO 'matches'
-            (team1, team2 , startDate, scraped_at) VALUES
-            (?, ?, ?, ?);
+            (team1, team2 , startDate, scraped_at, match_stats_link) VALUES
+            (?, ?, ?, ?, ?);
             '''
 
     def populate_data(self, row_data):
+        logger.info("Stats Details populated")
         self.cursor.execute(self.insert_matches_query, row_data)
         self.db_connection.commit()
 
     def populate_data_basic(self, row_data):
+        logger.info("Basic details populated")
         self.cursor.execute(self.insert_matches_basic_query, row_data)
         self.db_connection.commit()
 
@@ -103,6 +110,7 @@ class MatchScraper():
             # anchor =  match.find_element_by_xpath('..').find_element_by_xpath('.//a')
             # print(anchor.get_attribute('href'))
             self.driver.get(match_link)
+            # main_window = self.driver.current_window_handle
             scraped_at = datetime.now()
             self.driver.find_element_by_partial_link_text('FIKSTÜR').click()
             # print("Here")
@@ -135,7 +143,8 @@ class MatchScraper():
                         team2 = split_text[3].strip()
 
                         try:
-                            match_stats_link = k.find_element_by_xpath('//a/span[@data-dateformat="time"]').find_element_by_xpath('..').click()
+                            match_stats_link = k.find_element_by_xpath('//a/span[@data-dateformat="time"]').find_element_by_xpath('..').get_attribute('href')
+                            k.find_element_by_xpath('//a/span[@data-dateformat="time"]').find_element_by_xpath('..').click()
                             try:
                                 self.driver.find_element_by_partial_link_text('Genel').click()
                                 tople_left = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[2]/td[1]').text
@@ -168,14 +177,14 @@ class MatchScraper():
                                 logger.warning("Error in Stats Data :" + str(e))
                                 print("Exception ", str(e))
 
-                            data = (team1, team2, date, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmizi_left, kirmizi_right, orta_left, orta_right, scraped_at)
+                            data = (team1, team2, date, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmizi_left, kirmizi_right, orta_left, orta_right, scraped_at, match_stats_link)
                             self.database_adapter.populate_data(data)
                         except Exception as e:
                             logger.warning("Error in Stats Data :" + str(e))
 
-                        data = (team1, team2, date, scraped_at)
-                        self.database_adapter.populate_data_basic(data)
-
+                            data = (team1, team2, date, scraped_at, match_stats_link)
+                            self.database_adapter.populate_data_basic(data)
+            self.driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 'w')
         self.clean_up()
         print("Match Scraping completed.....")
 
@@ -184,12 +193,13 @@ class MatchScraper():
             self.start_scraping()
         except Exception as e:
             print("Error : ", str(e))
-            logging.error("Scraping halted ...!!!!!!!!!!!!!!")
-            logging.error(str(e))
+            logging.critical("Scraping halted ...!!!!!!!!!!!!!!")
+            logging.critical(str(e))
             # self.driver.quit()
 
 
 
 if __name__ == '__main__':
+    # exit()
     match_scraper = MatchScraper()
     match_scraper.scrape()

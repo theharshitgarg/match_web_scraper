@@ -33,6 +33,7 @@ class MatchesDBAdapter():
              team1 TEXT NOT NULL,
              team2 TEXT NOT NULL,
              startDate timestamp,
+             scraped_at timestamp,
              tople_left TEXT,
              tople_right TEXT,
              kormer_left TEXT,
@@ -50,14 +51,14 @@ class MatchesDBAdapter():
 
         self.insert_matches_query = '''
             INSERT INTO 'matches'
-            (team1, team2 , startDate, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmize_left, kirmizi_right, orta_left, orta_right) VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            (team1, team2 , startDate, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmize_left, kirmizi_right, orta_left, orta_right, scraped_at) VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             '''
 
         self.insert_matches_basic_query = '''
             INSERT INTO 'matches'
-            (team1, team2 , startDate) VALUES
-            (?, ?, ?);
+            (team1, team2 , startDate, scraped_at) VALUES
+            (?, ?, ?, ?);
             '''
 
     def populate_data(self, row_data):
@@ -102,6 +103,7 @@ class MatchScraper():
             # anchor =  match.find_element_by_xpath('..').find_element_by_xpath('.//a')
             # print(anchor.get_attribute('href'))
             self.driver.get(match_link)
+            scraped_at = datetime.now()
             self.driver.find_element_by_partial_link_text('FIKSTÜR').click()
             # print("Here")
             ol = self.driver.find_elements_by_xpath('//ol[contains(@class, "p0c-competition-match-list__days")]')
@@ -167,13 +169,13 @@ class MatchScraper():
                                 logger.warning("Error in Stats Data :" + str(e))
                                 print("Exception ", str(e))
 
-                            data = (team1, team2, date, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmizi_left, kirmizi_right, orta_left, orta_right)
+                            data = (team1, team2, date, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmizi_left, kirmizi_right, orta_left, orta_right, scraped_at)
                             self.database_adapter.populate_data(data)
                         except Exception as e:
                             logger.warning("Error in Stats Data :" + str(e))
 
                         # pdb.set_trace()
-                        data = (team1, team2, date)
+                        data = (team1, team2, date, scraped_at)
                         self.database_adapter.populate_data_basic(data)
 
         self.clean_up()

@@ -19,8 +19,8 @@ import logging
 
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
-logging.basicConfig(format=FORMAT, level=logging.DEBUG, filename='match_log.log')
-logger = logging.getLogger(__name__)
+logging.basicConfig(format=FORMAT, level=logging.DEBUG, filename='match_logs.log')
+logger = logging.getLogger("football_match_logger")
 logger.warning("Football Match Logger")
 
 class MatchesDBAdapter():
@@ -143,33 +143,34 @@ class MatchScraper():
                                 kormer_left = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[10]/td[1]').text
                                 kormer_right = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[10]/td[3]').text
                             except Exception as e:
-                                print("Exception ", str(e))
+                                logger.warning("Error in Stats Data :" + str(e))
 
                             try:
                                 self.driver.find_element_by_partial_link_text('Hücum').click()
                                 gol_left = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[1]').text
                                 gol_right = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[3]').text
                             except Exception as e:
-                                print("Exception ", str(e))
+                                logger.warning("Error in Stats Data :" + str(e))
 
                             try:
                                 self.driver.find_element_by_partial_link_text('Faul').click()
                                 kirmizi_left = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[5]/div/table/tbody/tr[6]/td[1]').text
                                 kirmizi_right = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[5]/div/table/tbody/tr[6]/td[3]').text
                             except Exception as e:
-                                print("Exception ", str(e))
+                                logger.warning("Error in Stats Data :" + str(e))
 
                             try:
                                 self.driver.find_element_by_partial_link_text('Pas').click()
                                 orta_left = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[1]').text
                                 orta_right = self.driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[3]/div/table/tbody/tr[2]/td[3]').text
                             except Exception as e:
+                                logger.warning("Error in Stats Data :" + str(e))
                                 print("Exception ", str(e))
 
                             data = (team1, team2, date, tople_left, tople_right, kormer_left, kormer_right, gol_left, gol_right, kirmizi_left, kirmizi_right, orta_left, orta_right)
                             self.database_adapter.populate_data(data)
                         except Exception as e:
-                            print("Exception ", str(e))
+                            logger.warning("Error in Stats Data :" + str(e))
 
                         # pdb.set_trace()
                         data = (team1, team2, date)

@@ -19,7 +19,7 @@ import logging
 
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
-logging.basicConfig(format=FORMAT, level=logging.DEBUG, filename='match_logs.log')
+logging.basicConfig(format=FORMAT, level=logging.INFO, filename='match_logs.log')
 logger = logging.getLogger("football_match_logger")
 logger.warning("Football Match Logger")
 
@@ -80,7 +80,7 @@ class MatchScraper():
     def clean_up(self):
         self.driver.close()
 
-    def scrape(self):
+    def start_scraping(self):
         print("Match Scraping started.....")
         self.driver.get(self.base_url)
         # sleep(self.default_sleep_interval)
@@ -136,7 +136,6 @@ class MatchScraper():
 
                         try:
                             match_stats_link = k.find_element_by_xpath('//a/span[@data-dateformat="time"]').find_element_by_xpath('..').click()
-
                             try:
                                 self.driver.find_element_by_partial_link_text('Genel').click()
                                 tople_left = driver.find_element_by_xpath('/html/body/div[6]/div[2]/main/div/div[2]/div/div/div[1]/div/div/div/div/div/ul/li[1]/div/table/tbody/tr[2]/td[1]').text
@@ -174,12 +173,21 @@ class MatchScraper():
                         except Exception as e:
                             logger.warning("Error in Stats Data :" + str(e))
 
-                        # pdb.set_trace()
                         data = (team1, team2, date, scraped_at)
                         self.database_adapter.populate_data_basic(data)
 
         self.clean_up()
         print("Match Scraping completed.....")
+
+    def scrape(self):
+        try:
+            self.start_scraping()
+        except Exception as e:
+            print("Error : ", str(e))
+            logging.error("Scraping halted ...!!!!!!!!!!!!!!")
+            logging.error(str(e))
+            # self.driver.quit()
+
 
 
 if __name__ == '__main__':

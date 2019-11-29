@@ -1,6 +1,5 @@
 """Match WebScraper."""
 
-
 import csv
 from datetime import datetime
 import pdb
@@ -16,6 +15,13 @@ from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome
 
 from  selenium.common.exceptions import ElementClickInterceptedException
+import logging
+
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+logging.basicConfig(format=FORMAT, level=logging.DEBUG, filename='match_log.log')
+logger = logging.getLogger(__name__)
+logger.warning("Football Match Logger")
 
 class MatchesDBAdapter():
     def __init__(self):

@@ -33,6 +33,7 @@ class MatchesDBAdapter():
         self.create_matches_table_query = '''
             CREATE TABLE IF NOT EXISTS matches
             (id INTEGER PRIMARY KEY,
+             is_stats_scraped INTEGER,
              team1 TEXT NOT NULL,
              team2 TEXT NOT NULL,
              startDate timestamp,

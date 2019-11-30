@@ -112,6 +112,7 @@ class MatchScraper():
             # anchor =  match.find_element_by_xpath('..').find_element_by_xpath('.//a')
             # print(anchor.get_attribute('href'))
             self.driver.get(match_link)
+            sleep(self.default_sleep_interval)
             # main_window = self.driver.current_window_handle
             scraped_at = datetime.now()
             self.driver.find_element_by_partial_link_text('FIKSTÜR').click()

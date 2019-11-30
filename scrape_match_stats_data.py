@@ -31,7 +31,7 @@ logger.warning("-"*80)
 
 class MatchesDBAdapter():
     def __init__(self):
-        self.db_connection = sqlite3.connect('football_matches2.db')
+        self.db_connection = sqlite3.connect('football_matches.db')
         self.cursor = self.db_connection.cursor()
 
         self.update_stats_query = '''

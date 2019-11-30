@@ -1,10 +1,10 @@
 """Match WebScraper."""
 
 import csv
-from datetime import datetime
+import logging
 import pdb
-from selenium.webdriver.common.keys import Keys
 import sqlite3
+from datetime import datetime
 # from collections import namedtuple
 # from threading import Thread
 from os.path import isfile
@@ -12,19 +12,19 @@ from os.path import isfile
 from time import ctime, sleep
 
 from bs4 import BeautifulSoup
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver import Chrome
-
-from  selenium.common.exceptions import ElementClickInterceptedException
-import logging
+from selenium.webdriver.common.keys import Keys
 
 FORMAT = '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(message)s'
 
 logging.basicConfig(format=FORMAT, level=logging.DEBUG, filename='match_logs.log')
+
 logger = logging.getLogger("football_match_logger")
-logger.info("Football Match Logger")
-logger.info("-"*80)
-logger.info("Starting at : " + datetime.now().strftime("%d:%m:%Y $H:%M:%S"))
-logger.info("-"*80)
+logger.warning("Football Match Logger")
+logger.warning("-"*80)
+logger.warning("Starting at : " + datetime.now().strftime("%d:%m:%Y $H:%M:%S"))
+logger.warning("-"*80)
 
 class MatchesDBAdapter():
     def __init__(self):

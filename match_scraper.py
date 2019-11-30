@@ -48,7 +48,8 @@ class MatchesDBAdapter():
              kirmizi_left TEXT,
              kirmizi_right TEXT,
              orta_left TEXT,
-             orta_right TEXT);
+             orta_right TEXT,
+             CONSTRAINT unique_matches UNIQUE(team1,team2,startDate));
             '''
 
         self.cursor.execute(self.create_matches_table_query)

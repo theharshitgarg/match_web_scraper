@@ -160,6 +160,7 @@ class MatchScraper():
             print("Error : ", str(e))
             logging.critical("Scraping halted ...!!!!!!!!!!!!!!")
             logging.critical(str(e))
+            # Uncomment the line to close the browser in the end in case of error
             # self.driver.quit()
 
 
